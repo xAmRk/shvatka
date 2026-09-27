@@ -3,82 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Задания ивента</title>
+  <title>Схватка Гильдий</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: var(--tg-theme-bg-color, #18222d);
-      --card-bg: var(--tg-theme-secondary-bg-color, #222f3e);
+      --bg: var(--tg-theme-bg-color, #131922);
+      --card-bg: var(--tg-theme-secondary-bg-color, #1e293b);
       --text: var(--tg-theme-text-color, #ffffff);
-      --hint: var(--tg-theme-hint-color, #7f8c8d);
-      --accent: var(--tg-theme-button-color, #2e86de);
+      --hint: var(--tg-theme-hint-color, #8e9ea9);
+      --accent: var(--tg-theme-button-color, #ff9f43);
+      --badge-bg: #29384d;
+      --pts-color: #f1a93b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 16px; padding-bottom: 30px; }
+    body { background-color: var(--bg); color: var(--text); padding: 14px; padding-bottom: 30px; }
 
-    .header { text-align: center; margin-bottom: 20px; }
-    .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-    .header p { font-size: 13px; color: var(--hint); }
+    .header { text-align: center; margin-bottom: 14px; }
+    .header h1 { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+    .header p { font-size: 13px; color: var(--hint); margin-top: 2px; }
 
-    .badge {
-      display: inline-block;
-      background: rgba(46, 134, 222, 0.2);
-      color: var(--accent);
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
+    /* Переключатель дней недели */
+    .tabs-wrapper {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      background: var(--card-bg);
+      color: var(--hint);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
       font-weight: 600;
-      margin-top: 8px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .tab-btn.active {
+      background: #ff9f43;
+      color: #1a1a1a;
+      border-color: #ff9f43;
+      font-weight: 700;
     }
 
+    .day-banner {
+      background: linear-gradient(135deg, #1f2b3e, #2b394f);
+      border-left: 4px solid #ff9f43;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .day-title { font-size: 15px; font-weight: 700; }
+    .day-sub { font-size: 12px; color: var(--hint); }
+
+    /* Карточки заданий */
     .quest-card {
       background: var(--card-bg);
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      cursor: pointer;
-      transition: transform 0.1s ease;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    .quest-card:active { transform: scale(0.98); }
-
-    .quest-head { display: flex; justify-content: space-between; align-items: center; }
-    .quest-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .chevron { transition: transform 0.2s ease; font-size: 12px; color: var(--hint); }
-    .quest-card.open .chevron { transform: rotate(180deg); }
-
-    .quest-details {
-      display: none;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+    .quest-name { font-size: 14px; font-weight: 500; max-width: 70%; line-height: 1.3; }
+    .quest-pts {
+      display: flex;
+      align-items: center;
+      gap: 5px;
       font-size: 14px;
-      line-height: 1.4;
-    }
-    .quest-card.open .quest-details { display: block; }
-
-    .row { margin-bottom: 10px; }
-    .label { color: var(--hint); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-    .reward { color: #f1c40f; font-weight: 600; }
-    .tip-box {
-      background: rgba(255,255,255,0.05);
-      padding: 8px 12px;
+      font-weight: 700;
+      color: var(--pts-color);
+      background: rgba(241, 169, 59, 0.12);
+      padding: 4px 8px;
       border-radius: 8px;
-      font-size: 13px;
+      white-space: nowrap;
+    }
+    .quest-pts span { font-size: 12px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
       color: var(--hint);
-      border-left: 3px solid var(--accent);
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h1>⚔️ Задания недели</h1>
-    <p>Каждую неделю список обновляется</p>
-    <div class="badge">Циклический ивент</div>
+    <h1>⚔️ СХВАТКА ГИЛЬДИЙ</h1>
+    <p>Список заданий и наградных очков</p>
   </div>
 
+  <!-- Вкладки дней -->
+  <div class="tabs-wrapper" id="tabs"></div>
+
+  <!-- Баннер текущего дня -->
+  <div class="day-banner">
+    <div>
+      <div class="day-title" id="day-name">День 1: Мощь Титанов</div>
+      <div class="day-sub" id="day-desc">Понедельник</div>
+    </div>
+    <span style="font-size: 20px;">🛡️</span>
+  </div>
+
+  <!-- Список карточек -->
   <div id="quests-container"></div>
 
   <script>
@@ -86,63 +128,117 @@
     tg.ready();
     tg.expand();
 
-    // Список заданий: названия, цели, награды и советы
-    const quests = [
+    const daysData = [
       {
-        icon: "⚔️",
-        title: "Задание 1: Зачистка",
-        desc: "Победите 10 монстров любого типа в базовых локациях.",
-        reward: "🪙 1 000 Золота + 100 Опыта",
-        tip: "Легче всего закрыть в первой локации без лишней траты ресурсов."
+        id: 1,
+        tabName: "Пн (Д1)",
+        title: "День 1: Мощь Титанов",
+        dayWeek: "Понедельник",
+        icon: "⚡",
+        quests: [
+          { name: "Увеличь на 3 мощь Титанов", pts: "100" },
+          { name: "Потрать 15 Камней облика Титана", pts: "100" },
+          { name: "Открой 1 раз сферу призыва", pts: "1 500" },
+          { name: "Открой 1 раз сферу стихий", pts: "1 200" },
+          { name: "Используй 100 зелий Титана", pts: "150" },
+          { name: "Зачисти Лагерь Бандитов 1 раз", pts: "2 500" },
+          { name: "Победи босса 1 раз", pts: "850" },
+          { name: "Победи 1 Монстра ур. 1 или выше", pts: "2 000" },
+          { name: "Открой 1 сундук в Башне", pts: "4 000" },
+          { name: "Начни 1 Экспедицию", pts: "5 000" },
+          { name: "Выполни 1 ежедневное задание", pts: "2 000" },
+          { name: "Получи 1 VIP очков", pts: "100" }
+        ]
       },
       {
-        icon: "💎",
-        title: "Задание 2: Сбор ресурсов",
-        desc: "Соберите 5 единиц редких материалов или кристаллов.",
-        reward: "💎 25 Кристаллов",
-        tip: "Ресурсы на карте восстанавливаются каждые 30 минут."
+        id: 2,
+        tabName: "Вт (Д2)",
+        title: "День 2: Облики героев",
+        dayWeek: "Вторник",
+        icon: "🥋",
+        quests: []
       },
       {
-        icon: "🤝",
-        title: "Задание 3: Взаимодействие",
-        desc: "Помогите соклановцу или проведите 1 совместный бой.",
-        reward: "🎁 Наградной сундук гильдии",
-        tip: "Засчитывается даже быстрый тренировочный поединок."
+        id: 3,
+        tabName: "Ср (Д3)",
+        title: "День 3: Мощь технологий",
+        dayWeek: "Среда",
+        icon: "🔬",
+        quests: []
+      },
+      {
+        id: 4,
+        tabName: "Чт (Д4)",
+        title: "День 4: Мощь Героев",
+        dayWeek: "Четверг",
+        icon: "👑",
+        quests: []
+      },
+      {
+        id: 5,
+        tabName: "Пт (Д5)",
+        title: "День 5: Тренировка Армии",
+        dayWeek: "Пятница",
+        icon: "🏹",
+        quests: []
+      },
+      {
+        id: 6,
+        tabName: "Сб (Д6)",
+        title: "День 6: Охота на врага",
+        dayWeek: "Суббота",
+        icon: "🎯",
+        quests: []
       }
     ];
 
-    const container = document.getElementById("quests-container");
+    let currentDayId = 1;
 
-    quests.forEach(q => {
-      const card = document.createElement("div");
-      card.className = "quest-card";
-      card.innerHTML = `
-        <div class="quest-head">
-          <div class="quest-title"><span>${q.icon}</span> ${q.title}</div>
-          <span class="chevron">▼</span>
-        </div>
-        <div class="quest-details">
-          <div class="row">
-            <div class="label">Цель:</div>
-            <div>${q.desc}</div>
-          </div>
-          <div class="row">
-            <div class="label">Награда:</div>
-            <div class="reward">${q.reward}</div>
-          </div>
-          <div class="tip-box">💡 <b>Совет:</b> ${q.tip}</div>
-        </div>
-      `;
-
-      card.addEventListener("click", () => {
-        card.classList.toggle("open");
-        if (tg.HapticFeedback) {
-          tg.HapticFeedback.impactOccurred("light");
-        }
+    function renderTabs() {
+      const tabsContainer = document.getElementById("tabs");
+      tabsContainer.innerHTML = "";
+      daysData.forEach(d => {
+        const btn = document.createElement("button");
+        btn.className = `tab-btn ${d.id === currentDayId ? "active" : ""}`;
+        btn.innerText = `${d.icon} ${d.tabName}`;
+        btn.onclick = () => selectDay(d.id);
+        tabsContainer.appendChild(btn);
       });
+    }
 
-      container.appendChild(card);
-    });
+    function selectDay(id) {
+      currentDayId = id;
+      renderTabs();
+      renderQuests();
+      if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    }
+
+    function renderQuests() {
+      const day = daysData.find(d => d.id === currentDayId);
+      document.getElementById("day-name").innerText = day.title;
+      document.getElementById("day-desc").innerText = day.dayWeek;
+
+      const container = document.getElementById("quests-container");
+      container.innerHTML = "";
+
+      if (day.quests.length === 0) {
+        container.innerHTML = `<div class="empty-state">⏳ Задания для этого дня скоро появятся...</div>`;
+        return;
+      }
+
+      day.quests.forEach(q => {
+        const card = document.createElement("div");
+        card.className = "quest-card";
+        card.innerHTML = `
+          <div class="quest-name">${q.name}</div>
+          <div class="quest-pts">${q.pts} <span>🟡</span></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    renderTabs();
+    renderQuests();
   </script>
 </body>
 </html>
