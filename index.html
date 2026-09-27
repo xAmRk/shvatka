@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Схватка Гильдий v1.2.0</title>
-  <script src="https://telegram.org/js/telegram-web-app.js?v=1.2.0"></script>
+  <title>Схватка Гильдий v1.2.1</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?v=1.2.1"></script>
   <style>
     :root {
       --bg: var(--tg-theme-bg-color, #131922);
@@ -149,7 +149,7 @@
   <div class="header">
     <h1>⚔️ СХВАТКА ГИЛЬДИЙ</h1>
     <p>Список заданий и наградных очков</p>
-    <div class="version-tag">v1.2.0</div>
+    <div class="version-tag">v1.2.1</div>
   </div>
 
   <!-- Компактная сетка 6 дней недели -->
@@ -186,13 +186,14 @@
           { icon: "🔮", name: "Открой 1 раз сферу призыва", pts: "+1 500" },
           { icon: "🌌", name: "Открой 1 раз сферу стихий", pts: "+1 200" },
           { icon: "🧪", name: "Используй 100 зелий Титана", pts: "+150" },
-          { icon: "🏕️", name: "Зачисти Лагерь Бандитов 1 раз", pts: "+2 500" },
-          { icon: "💥", name: "Победи босса 1 раз", pts: "+850" },
-          { icon: "👹", name: "Победи 1 Монстра ур. 1 или выше", pts: "+2 000" },
           { icon: "👑", name: "Открой 1 сундук в Башне", pts: "+4 000" },
           { icon: "🗺️", name: "Начни 1 Экспедицию", pts: "+5 000" },
           { icon: "📋", name: "Выполни 1 ежедневное задание", pts: "+2 000" },
-          { icon: "⭐", name: "Получи 1 VIP очков", pts: "+100" }
+          { icon: "⭐", name: "Получи 1 VIP очков", pts: "+100" },
+          { isDivider: true, title: "ЦАРСТВО" },
+          { icon: "🏕️", name: "Зачисти Лагерь Бандитов 1 раз", pts: "+2 500" },
+          { icon: "💥", name: "Победи босса 1 раз", pts: "+850" },
+          { icon: "👹", name: "Победи 1 Монстра ур. 1 или выше", pts: "+2 000" }
         ]
       },
       {
