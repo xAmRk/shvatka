@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Схватка Гильдий v1.2.1</title>
-  <script src="https://telegram.org/js/telegram-web-app.js?v=1.2.1"></script>
+  <title>Схватка Гильдий v1.3.0</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?v=1.3.0"></script>
   <style>
     :root {
       --bg: var(--tg-theme-bg-color, #131922);
@@ -16,7 +16,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 12px; padding-bottom: 25px; }
+    body { background-color: var(--bg); color: var(--text); padding: 12px; padding-bottom: 95px; }
 
     .header { text-align: center; margin-bottom: 12px; }
     .header h1 { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
@@ -33,7 +33,7 @@
       margin-top: 3px;
     }
 
-    /* Компактная сетка дней 3x2 */
+    /* Сетка 3x2 */
     .days-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -91,7 +91,7 @@
     .day-title { font-size: 15px; font-weight: 700; }
     .day-sub { font-size: 12px; color: var(--hint); margin-top: 1px; }
 
-    /* Разделитель категорий заданий */
+    /* Разделитель категорий */
     .category-divider {
       font-size: 11px;
       font-weight: 700;
@@ -114,48 +114,117 @@
     .quest-card {
       background: var(--card-bg);
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 9px 12px;
       margin-bottom: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border: 1px solid rgba(255, 255, 255, 0.05);
       box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      gap: 8px;
     }
     .quest-left {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      max-width: 72%;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      min-width: 0;
     }
-    .quest-icon { font-size: 16px; flex-shrink: 0; }
-    .quest-name { font-size: 13px; font-weight: 500; line-height: 1.35; color: #f8fafc; }
-    .quest-pts {
+    .quest-row-main {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .quest-icon { font-size: 15px; flex-shrink: 0; }
+    .quest-name { font-size: 13px; font-weight: 500; line-height: 1.3; color: #f8fafc; }
+    .quest-rate {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--pts-color);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* Блок калькулятора в карточке */
+    .calc-controls {
       display: flex;
       align-items: center;
       gap: 4px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--pts-color);
-      background: rgba(241, 169, 59, 0.12);
-      padding: 4px 7px;
-      border-radius: 6px;
-      white-space: nowrap;
+      flex-shrink: 0;
     }
+    .calc-btn {
+      width: 28px;
+      height: 28px;
+      background: #27354a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s;
+    }
+    .calc-btn:active { background: #ff9f43; color: #000; }
+    .calc-input {
+      width: 48px;
+      height: 28px;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      color: #f1a93b;
+      font-weight: 700;
+      font-size: 13px;
+      text-align: center;
+      outline: none;
+    }
+
+    /* Нижняя плавающая панель с суммой очков */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(19, 25, 34, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
+    }
+    .bottom-score-label { font-size: 11px; text-transform: uppercase; color: var(--hint); letter-spacing: 0.5px; }
+    .bottom-score-val { font-size: 18px; font-weight: 800; color: #ff9f43; display: flex; align-items: center; gap: 4px; }
+    .btn-reset {
+      background: #27354a;
+      color: #94a3b8;
+      border: none;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-reset:active { color: #fff; background: #e74c3c; }
   </style>
 </head>
 <body>
 
   <div class="header">
     <h1>⚔️ СХВАТКА ГИЛЬДИЙ</h1>
-    <p>Список заданий и наградных очков</p>
-    <div class="version-tag">v1.2.1</div>
+    <p>Калькулятор заданий и наградных очков</p>
+    <div class="version-tag">v1.3.0</div>
   </div>
 
-  <!-- Компактная сетка 6 дней недели -->
+  <!-- Сетка 6 дней -->
   <div class="days-grid" id="days-grid"></div>
 
-  <!-- Инфо-баннер выбранного дня -->
+  <!-- Баннер выбранного дня -->
   <div class="day-banner">
     <div>
       <div class="day-title" id="day-name">День 1: Мощь Титанов</div>
@@ -164,8 +233,17 @@
     <span id="day-icon" style="font-size: 22px;">⚡</span>
   </div>
 
-  <!-- Контейнер карточек заданий -->
+  <!-- Контейнер заданий -->
   <div id="quests-container"></div>
+
+  <!-- Нижняя панель суммы очков -->
+  <div class="bottom-bar">
+    <div>
+      <div class="bottom-score-label">Очков за день:</div>
+      <div class="bottom-score-val" id="total-score">0 <span>🟡</span></div>
+    </div>
+    <button class="btn-reset" onclick="resetDayCounters()">Сбросить</button>
+  </div>
 
   <script>
     const tg = window.Telegram.WebApp;
@@ -181,19 +259,19 @@
         dayWeek: "Понедельник",
         icon: "⚡",
         quests: [
-          { icon: "⚡", name: "Увеличь на 3 мощь Титанов", pts: "+100" },
-          { icon: "👁️", name: "Потрать 15 Камней облика Титана", pts: "+100" },
-          { icon: "🔮", name: "Открой 1 раз сферу призыва", pts: "+1 500" },
-          { icon: "🌌", name: "Открой 1 раз сферу стихий", pts: "+1 200" },
-          { icon: "🧪", name: "Используй 100 зелий Титана", pts: "+150" },
-          { icon: "👑", name: "Открой 1 сундук в Башне", pts: "+4 000" },
-          { icon: "🗺️", name: "Начни 1 Экспедицию", pts: "+5 000" },
-          { icon: "📋", name: "Выполни 1 ежедневное задание", pts: "+2 000" },
-          { icon: "⭐", name: "Получи 1 VIP очков", pts: "+100" },
+          { id: "d1_1", icon: "⚡", name: "Увеличь на 3 мощь Титанов", val: 100 },
+          { id: "d1_2", icon: "👁️", name: "Потрать 15 Камней облика Титана", val: 100 },
+          { id: "d1_3", icon: "🔮", name: "Открой 1 раз сферу призыва", val: 1500 },
+          { id: "d1_4", icon: "🌌", name: "Открой 1 раз сферу стихий", val: 1200 },
+          { id: "d1_5", icon: "🧪", name: "Используй 100 зелий Титана", val: 150 },
+          { id: "d1_6", icon: "👑", name: "Открой 1 сундук в Башне", val: 4000 },
+          { id: "d1_7", icon: "🗺️", name: "Начни 1 Экспедицию", val: 5000 },
+          { id: "d1_8", icon: "📋", name: "Выполни 1 ежедневное задание", val: 2000 },
+          { id: "d1_9", icon: "⭐", name: "Получи 1 VIP очков", val: 100 },
           { isDivider: true, title: "ЦАРСТВО" },
-          { icon: "🏕️", name: "Зачисти Лагерь Бандитов 1 раз", pts: "+2 500" },
-          { icon: "💥", name: "Победи босса 1 раз", pts: "+850" },
-          { icon: "👹", name: "Победи 1 Монстра ур. 1 или выше", pts: "+2 000" }
+          { id: "d1_10", icon: "🏕️", name: "Зачисти Лагерь Бандитов 1 раз", val: 2500 },
+          { id: "d1_11", icon: "💥", name: "Победи босса 1 раз", val: 850 },
+          { id: "d1_12", icon: "👹", name: "Победи 1 Монстра ур. 1 или выше", val: 2000 }
         ]
       },
       {
@@ -204,21 +282,21 @@
         dayWeek: "Вторник",
         icon: "🥋",
         quests: [
-          { icon: "👁️", name: "Потрать 15 Камней облика Героя", pts: "+700" },
-          { icon: "⚔️", name: "Сразись 1 раз на Арене", pts: "+6 000" },
-          { icon: "🗡️", name: "Сразись 1 раз на Гранд Арене", pts: "+6 000" },
-          { icon: "💎", name: "Получи 1 Камень души Героя", pts: "+500" },
-          { icon: "👑", name: "Открой 1 сундук в Башне", pts: "+4 000" },
-          { icon: "🗺️", name: "Начни 1 Экспедицию", pts: "+5 000" },
-          { icon: "📋", name: "Выполни 1 ежедневное задание", pts: "+2 000" },
-          { icon: "⭐", name: "Получи 1 VIP очков", pts: "+100" },
+          { id: "d2_1", icon: "👁️", name: "Потрать 15 Камней облика Героя", val: 700 },
+          { id: "d2_2", icon: "⚔️", name: "Сразись 1 раз на Арене", val: 6000 },
+          { id: "d2_3", icon: "🗡️", name: "Сразись 1 раз на Гранд Арене", val: 6000 },
+          { id: "d2_4", icon: "💎", name: "Получи 1 Камень души Героя", val: 500 },
+          { id: "d2_5", icon: "👑", name: "Открой 1 сундук в Башне", val: 4000 },
+          { id: "d2_6", icon: "🗺️", name: "Начни 1 Экспедицию", val: 5000 },
+          { id: "d2_7", icon: "📋", name: "Выполни 1 ежедневное задание", val: 2000 },
+          { id: "d2_8", icon: "⭐", name: "Получи 1 VIP очков", val: 100 },
           { isDivider: true, title: "ЦАРСТВО" },
-          { icon: "🏰", name: "Повысь мощь строительством на 1", pts: "+200" },
-          { icon: "🔨", name: "Используй ускорение постройки на 1 мин.", pts: "+200" },
-          { icon: "🍞", name: "Собери 3 000 ресурса на карте: Еда", pts: "+10" },
-          { icon: "🪵", name: "Собери 3 000 ресурса на карте: Дерево", pts: "+10" },
-          { icon: "🪨", name: "Собери 600 ресурса на карте: Камень", pts: "+10" },
-          { icon: "🔩", name: "Собери 150 ресурса на карте: Железо", pts: "+10" }
+          { id: "d2_9", icon: "🏰", name: "Повысь мощь строительством на 1", val: 200 },
+          { id: "d2_10", icon: "🔨", name: "Используй ускорение постройки на 1 мин.", val: 200 },
+          { id: "d2_11", icon: "🍞", name: "Собери 3 000 ресурса на карте: Еда", val: 10 },
+          { id: "d2_12", icon: "🪵", name: "Собери 3 000 ресурса на карте: Дерево", val: 10 },
+          { id: "d2_13", icon: "🪨", name: "Собери 600 ресурса на карте: Камень", val: 10 },
+          { id: "d2_14", icon: "🔩", name: "Собери 150 ресурса на карте: Железо", val: 10 }
         ]
       },
       {
@@ -229,19 +307,19 @@
         dayWeek: "Среда",
         icon: "🔬",
         quests: [
-          { icon: "✨", name: "Открой 1 раз Артефактный сундук", pts: "+750" },
-          { icon: "⚡", name: "Потрать 3 Энергии", pts: "+100" },
-          { icon: "👑", name: "Открой 1 сундук в Башне", pts: "+4 000" },
-          { icon: "🗺️", name: "Начни 1 Экспедицию", pts: "+5 000" },
-          { icon: "📋", name: "Выполни 1 ежедневное задание", pts: "+2 000" },
-          { icon: "⭐", name: "Получи 1 VIP очков", pts: "+100" },
+          { id: "d3_1", icon: "✨", name: "Открой 1 раз Артефактный сундук", val: 750 },
+          { id: "d3_2", icon: "⚡", name: "Потрать 3 Энергии", val: 100 },
+          { id: "d3_3", icon: "👑", name: "Открой 1 сундук в Башне", val: 4000 },
+          { id: "d3_4", icon: "🗺️", name: "Начни 1 Экспедицию", val: 5000 },
+          { id: "d3_5", icon: "📋", name: "Выполни 1 ежедневное задание", val: 2000 },
+          { id: "d3_6", icon: "⭐", name: "Получи 1 VIP очков", val: 100 },
           { isDivider: true, title: "ЦАРСТВО" },
-          { icon: "🧪", name: "Повысь мощь исследованиями на 1", pts: "+30" },
-          { icon: "⏩", name: "Используй ускорение исследований на 1 мин.", pts: "+200" },
-          { icon: "🎖️", name: "Потрать 1 Знак Чести", pts: "+2 000" },
-          { icon: "🏕️", name: "Зачисти Лагерь Бандитов 1 раз", pts: "+2 500" },
-          { icon: "💥", name: "Победи босса 1 раз", pts: "+850" },
-          { icon: "👹", name: "Победи 1 Монстра ур. 1 или выше", pts: "+2 000" }
+          { id: "d3_7", icon: "🧪", name: "Повысь мощь исследованиями на 1", val: 30 },
+          { id: "d3_8", icon: "⏩", name: "Используй ускорение исследований на 1 мин.", val: 200 },
+          { id: "d3_9", icon: "🎖️", name: "Потрать 1 Знак Чести", val: 2000 },
+          { id: "d3_10", icon: "🏕️", name: "Зачисти Лагерь Бандитов 1 раз", val: 2500 },
+          { id: "d3_11", icon: "💥", name: "Победи босса 1 раз", val: 850 },
+          { id: "d3_12", icon: "👹", name: "Победи 1 Монстра ур. 1 или выше", val: 2000 }
         ]
       },
       {
@@ -252,26 +330,26 @@
         dayWeek: "Четверг",
         icon: "👑",
         quests: [
-          { icon: "🛡️", name: "Получи 1 мощи героя", pts: "+30" },
-          { icon: "💠", name: "Потрать 15 кристаллов мастерства", pts: "+200" },
-          { icon: "🔥", name: "Потрать 1 Ядро Хаоса", pts: "+3 000" },
-          { icon: "🔴", name: "Надень 1 Красный предмет", pts: "+1 250 000" },
-          { icon: "🟠", name: "Надень 1 Оранжевый предмет", pts: "+160 000" },
-          { icon: "🟣", name: "Надень 1 Фиолетовый предмет", pts: "+27 000" },
-          { icon: "🔵", name: "Надень 1 Синий предмет", pts: "+5 000" },
-          { icon: "🟢", name: "Надень 1 Зелёный предмет", pts: "+1 000" },
-          { icon: "⚪", name: "Надень 1 Белый предмет", pts: "+400" },
-          { icon: "⚔️", name: "Сразись 1 раз на Арене", pts: "+6 000" },
-          { icon: "🗡️", name: "Сразись 1 раз на Гранд Арене", pts: "+6 000" },
-          { icon: "👑", name: "Открой 1 сундук в Башне", pts: "+4 000" },
-          { icon: "🗺️", name: "Начни 1 Экспедицию", pts: "+5 000" },
-          { icon: "📋", name: "Выполни 1 ежедневное задание", pts: "+2 000" },
-          { icon: "⭐", name: "Получи 1 VIP очков", pts: "+100" },
+          { id: "d4_1", icon: "🛡️", name: "Получи 1 мощи героя", val: 30 },
+          { id: "d4_2", icon: "💠", name: "Потрать 15 кристаллов мастерства", val: 200 },
+          { id: "d4_3", icon: "🔥", name: "Потрать 1 Ядро Хаоса", val: 3000 },
+          { id: "d4_4", icon: "🔴", name: "Надень 1 Красный предмет", val: 1250000 },
+          { id: "d4_5", icon: "🟠", name: "Надень 1 Оранжевый предмет", val: 160000 },
+          { id: "d4_6", icon: "🟣", name: "Надень 1 Фиолетовый предмет", val: 27000 },
+          { id: "d4_7", icon: "🔵", name: "Надень 1 Синий предмет", val: 5000 },
+          { id: "d4_8", icon: "🟢", name: "Надень 1 Зелёный предмет", val: 1000 },
+          { id: "d4_9", icon: "⚪", name: "Надень 1 Белый предмет", val: 400 },
+          { id: "d4_10", icon: "⚔️", name: "Сразись 1 раз на Арене", val: 6000 },
+          { id: "d4_11", icon: "🗡️", name: "Сразись 1 раз на Гранд Арене", val: 6000 },
+          { id: "d4_12", icon: "👑", name: "Открой 1 сундук в Башне", val: 4000 },
+          { id: "d4_13", icon: "🗺️", name: "Начни 1 Экспедицию", val: 5000 },
+          { id: "d4_14", icon: "📋", name: "Выполни 1 ежедневное задание", val: 2000 },
+          { id: "d4_15", icon: "⭐", name: "Получи 1 VIP очков", val: 100 },
           { isDivider: true, title: "ЦАРСТВО" },
-          { icon: "🍞", name: "Собери 3 000 ресурса на карте: Еда", pts: "+10" },
-          { icon: "🪵", name: "Собери 3 000 ресурса на карте: Дерево", pts: "+10" },
-          { icon: "🪨", name: "Собери 600 ресурса на карте: Камень", pts: "+10" },
-          { icon: "🔩", name: "Собери 150 ресурса на карте: Железо", pts: "+10" }
+          { id: "d4_16", icon: "🍞", name: "Собери 3 000 ресурса на карте: Еда", val: 10 },
+          { id: "d4_17", icon: "🪵", name: "Собери 3 000 ресурса на карте: Дерево", val: 10 },
+          { id: "d4_18", icon: "🪨", name: "Собери 600 ресурса на карте: Камень", val: 10 },
+          { id: "d4_19", icon: "🔩", name: "Собери 150 ресурса на карте: Железо", val: 10 }
         ]
       },
       {
@@ -282,29 +360,29 @@
         dayWeek: "Пятница",
         icon: "🏹",
         quests: [
-          { icon: "🎁", name: "Открой 1 раз Героический сундук", pts: "+4 000" },
-          { icon: "✨", name: "Открой 1 раз Артефактный сундук", pts: "+750" },
-          { icon: "🌌", name: "Открой 1 сундук в Запределье", pts: "+2 000" },
-          { icon: "🔮", name: "Открой 1 раз сферу стихий", pts: "+1 200" },
-          { icon: "👑", name: "Открой 1 сундук в Башне", pts: "+4 000" },
-          { icon: "🗺️", name: "Начни 1 Экспедицию", pts: "+5 000" },
-          { icon: "📋", name: "Выполни 1 ежедневное задание", pts: "+2 000" },
-          { icon: "⭐", name: "Получи 1 VIP очков", pts: "+100" },
+          { id: "d5_1", icon: "🎁", name: "Открой 1 раз Героический сундук", val: 4000 },
+          { id: "d5_2", icon: "✨", name: "Открой 1 раз Артефактный сундук", val: 750 },
+          { id: "d5_3", icon: "🌌", name: "Открой 1 сундук в Запределье", val: 2000 },
+          { id: "d5_4", icon: "🔮", name: "Открой 1 раз сферу стихий", val: 1200 },
+          { id: "d5_5", icon: "👑", name: "Открой 1 сундук в Башне", val: 4000 },
+          { id: "d5_6", icon: "🗺️", name: "Начни 1 Экспедицию", val: 5000 },
+          { id: "d5_7", icon: "📋", name: "Выполни 1 ежедневное задание", val: 2000 },
+          { id: "d5_8", icon: "⭐", name: "Получи 1 VIP очков", val: 100 },
           { isDivider: true, title: "ЦАРСТВО" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.1", pts: "+7" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.2", pts: "+10" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.3", pts: "+14" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.4", pts: "+20" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.5", pts: "+29" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.6", pts: "+41" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.7", pts: "+59" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.8", pts: "+84" },
-          { icon: "💂", name: "Подготовь 1 войско Ур.9", pts: "+120" },
-          { icon: "⏱️", name: "Используй ускорение тренировок на 1 мин.", pts: "+200" },
-          { icon: "📜", name: "Потрать 1 руководство командиров", pts: "+5 000" },
-          { icon: "🏕️", name: "Зачисти Лагерь Бандитов 1 раз", pts: "+2 500" },
-          { icon: "💥", name: "Победи босса 1 раз", pts: "+850" },
-          { icon: "👹", name: "Победи 1 Монстра ур. 1 или выше", pts: "+2 000" }
+          { id: "d5_9", icon: "💂", name: "Подготовь 1 войско Ур.1", val: 7 },
+          { id: "d5_10", icon: "💂", name: "Подготовь 1 войско Ур.2", val: 10 },
+          { id: "d5_11", icon: "💂", name: "Подготовь 1 войско Ур.3", val: 14 },
+          { id: "d5_12", icon: "💂", name: "Подготовь 1 войско Ур.4", val: 20 },
+          { id: "d5_13", icon: "💂", name: "Подготовь 1 войско Ур.5", val: 29 },
+          { id: "d5_14", icon: "💂", name: "Подготовь 1 войско Ур.6", val: 41 },
+          { id: "d5_15", icon: "💂", name: "Подготовь 1 войско Ур.7", val: 59 },
+          { id: "d5_16", icon: "💂", name: "Подготовь 1 войско Ур.8", val: 84 },
+          { id: "d5_17", icon: "💂", name: "Подготовь 1 войско Ур.9", val: 120 },
+          { id: "d5_18", icon: "⏱️", name: "Используй ускорение тренировок на 1 мин.", val: 200 },
+          { id: "d5_19", icon: "📜", name: "Потрать 1 руководство командиров", val: 5000 },
+          { id: "d5_20", icon: "🏕️", name: "Зачисти Лагерь Бандитов 1 раз", val: 2500 },
+          { id: "d5_21", icon: "💥", name: "Победи босса 1 раз", val: 850 },
+          { id: "d5_22", icon: "👹", name: "Победи 1 Монстра ур. 1 или выше", val: 2000 }
         ]
       },
       {
@@ -315,40 +393,54 @@
         dayWeek: "Суббота",
         icon: "🎯",
         quests: [
-          { icon: "🌀", name: "Потрать 100 рунных сфер", pts: "+50 000" },
-          { icon: "🔶", name: "Потрать 20 рунных камней", pts: "+100" },
-          { icon: "⚔️", name: "Сразись 1 раз на Арене", pts: "+6 000" },
-          { icon: "🗡️", name: "Сразись 1 раз на Гранд Арене", pts: "+6 000" },
-          { icon: "👑", name: "Открой 1 сундук в Башне", pts: "+4 000" },
-          { icon: "🗺️", name: "Начни 1 Экспедицию", pts: "+5 000" },
-          { icon: "📋", name: "Выполни 1 ежедневное задание", pts: "+2 000" },
-          { icon: "⭐", name: "Получи 1 VIP очков", pts: "+100" },
+          { id: "d6_1", icon: "🌀", name: "Потрать 100 рунных сфер", val: 50000 },
+          { id: "d6_2", icon: "🔶", name: "Потрать 20 рунных камней", val: 100 },
+          { id: "d6_3", icon: "⚔️", name: "Сразись 1 раз на Арене", val: 6000 },
+          { id: "d6_4", icon: "🗡️", name: "Сразись 1 раз на Гранд Арене", val: 6000 },
+          { id: "d6_5", icon: "👑", name: "Открой 1 сундук в Башне", val: 4000 },
+          { id: "d6_6", icon: "🗺️", name: "Начни 1 Экспедицию", val: 5000 },
+          { id: "d6_7", icon: "📋", name: "Выполни 1 ежедневное задание", val: 2000 },
+          { id: "d6_8", icon: "⭐", name: "Получи 1 VIP очков", val: 100 },
           { isDivider: true, title: "ЦАРСТВО" },
-          { icon: "💀", name: "Потеряй войска 1 ур. в бою с игроком", pts: "+1" },
-          { icon: "💀", name: "Потеряй войска 2 ур. в бою с игроком", pts: "+2" },
-          { icon: "💀", name: "Потеряй войска 3 ур. в бою с игроком", pts: "+3" },
-          { icon: "💀", name: "Потеряй войска 4 ур. в бою с игроком", pts: "+4" },
-          { icon: "💀", name: "Потеряй войска 5 ур. в бою с игроком", pts: "+6" },
-          { icon: "💀", name: "Потеряй войска 6 ур. в бою с игроком", pts: "+8" },
-          { icon: "💀", name: "Потеряй войска 7 ур. в бою с игроком", pts: "+12" },
-          { icon: "💀", name: "Потеряй войска 8 ур. в бою с игроком", pts: "+16" },
-          { icon: "💀", name: "Потеряй войска 9 ур. в бою с игроком", pts: "+18" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.1 в PvP", pts: "+2" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.2 в PvP", pts: "+3" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.3 в PvP", pts: "+4" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.4 в PvP", pts: "+6" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.5 в PvP", pts: "+9" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.6 в PvP", pts: "+13" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.7 в PvP", pts: "+19" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.8 в PvP", pts: "+26" },
-          { icon: "⚔️", name: "Убей 1 войско Ур.9 в PvP", pts: "+30" },
-          { icon: "🩹", name: "Используй ускорение лечения на 1 мин.", pts: "+200" },
-          { icon: "⏱️", name: "Используй ускорение тренировок на 1 мин.", pts: "+200" }
+          { id: "d6_9", icon: "💀", name: "Потеряй войска 1 ур. в бою с игроком", val: 1 },
+          { id: "d6_10", icon: "💀", name: "Потеряй войска 2 ур. в бою с игроком", val: 2 },
+          { id: "d6_11", icon: "💀", name: "Потеряй войска 3 ур. в бою с игроком", val: 3 },
+          { id: "d6_12", icon: "💀", name: "Потеряй войска 4 ур. в бою с игроком", val: 4 },
+          { id: "d6_13", icon: "💀", name: "Потеряй войска 5 ур. в бою с игроком", val: 6 },
+          { id: "d6_14", icon: "💀", name: "Потеряй войска 6 ур. в бою с игроком", val: 8 },
+          { id: "d6_15", icon: "💀", name: "Потеряй войска 7 ур. в бою с игроком", val: 12 },
+          { id: "d6_16", icon: "💀", name: "Потеряй войска 8 ур. в бою с игроком", val: 16 },
+          { id: "d6_17", icon: "💀", name: "Потеряй войска 9 ур. в бою с игроком", val: 18 },
+          { id: "d6_18", icon: "⚔️", name: "Убей 1 войско Ур.1 в PvP", val: 2 },
+          { id: "d6_19", icon: "⚔️", name: "Убей 1 войско Ур.2 в PvP", val: 3 },
+          { id: "d6_20", icon: "⚔️", name: "Убей 1 войско Ур.3 в PvP", val: 4 },
+          { id: "d6_21", icon: "⚔️", name: "Убей 1 войско Ур.4 в PvP", val: 6 },
+          { id: "d6_22", icon: "⚔️", name: "Убей 1 войско Ур.5 в PvP", val: 9 },
+          { id: "d6_23", icon: "⚔️", name: "Убей 1 войско Ур.6 в PvP", val: 13 },
+          { id: "d6_24", icon: "⚔️", name: "Убей 1 войско Ур.7 в PvP", val: 19 },
+          { id: "d6_25", icon: "⚔️", name: "Убей 1 войско Ур.8 в PvP", val: 26 },
+          { id: "d6_26", icon: "⚔️", name: "Убей 1 войско Ур.9 в PvP", val: 30 },
+          { id: "d6_27", icon: "🩹", name: "Используй ускорение лечения на 1 мин.", val: 200 },
+          { id: "d6_28", icon: "⏱️", name: "Используй ускорение тренировок на 1 мин.", val: 200 }
         ]
       }
     ];
 
-    let currentDayId = 1;
+    // Хранилище введённых количеств: { questId: count }
+    const counts = {};
+
+    // 1. Автоопределение текущего дня недели (1 = Пн, ..., 6 = Сб, 0/Вс = Пн)
+    function getInitialDay() {
+      const dayNum = new Date().getDay();
+      if (dayNum >= 1 && dayNum <= 6) return dayNum;
+      return 1;
+    }
+
+    let currentDayId = getInitialDay();
+
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
 
     function renderGrid() {
       const grid = document.getElementById("days-grid");
@@ -371,7 +463,48 @@
       currentDayId = id;
       renderGrid();
       renderQuests();
+      calculateTotal();
       if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    }
+
+    function updateCount(questId, delta) {
+      const current = counts[questId] || 0;
+      const next = Math.max(0, current + delta);
+      counts[questId] = next;
+      const input = document.getElementById(`input_${questId}`);
+      if (input) input.value = next === 0 ? "" : next;
+      calculateTotal();
+      if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
+    }
+
+    function onInputChange(questId, val) {
+      const clean = parseInt(val.replace(/\D/g, ""), 10) || 0;
+      counts[questId] = Math.max(0, clean);
+      const input = document.getElementById(`input_${questId}`);
+      if (input) input.value = counts[questId] === 0 ? "" : counts[questId];
+      calculateTotal();
+    }
+
+    function calculateTotal() {
+      const day = daysData.find(d => d.id === currentDayId);
+      let total = 0;
+      day.quests.forEach(q => {
+        if (!q.isDivider) {
+          const qty = counts[q.id] || 0;
+          total += qty * q.val;
+        }
+      });
+      document.getElementById("total-score").innerHTML = `${formatNumber(total)} <span>🟡</span>`;
+    }
+
+    function resetDayCounters() {
+      const day = daysData.find(d => d.id === currentDayId);
+      day.quests.forEach(q => {
+        if (!q.isDivider) delete counts[q.id];
+      });
+      renderQuests();
+      calculateTotal();
+      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("warning");
     }
 
     function renderQuests() {
@@ -392,14 +525,22 @@
           return;
         }
 
+        const qty = counts[q.id] || "";
         const card = document.createElement("div");
         card.className = "quest-card";
         card.innerHTML = `
           <div class="quest-left">
-            <span class="quest-icon">${q.icon}</span>
-            <span class="quest-name">${q.name}</span>
+            <div class="quest-row-main">
+              <span class="quest-icon">${q.icon}</span>
+              <span class="quest-name">${q.name}</span>
+            </div>
+            <div class="quest-rate">+${formatNumber(q.val)} 🟡 / за раз</div>
           </div>
-          <div class="quest-pts">${q.pts} <span>🟡</span></div>
+          <div class="calc-controls">
+            <button class="calc-btn" onclick="updateCount('${q.id}', -1)">−</button>
+            <input type="text" inputmode="numeric" class="calc-input" id="input_${q.id}" value="${qty}" placeholder="0" oninput="onInputChange('${q.id}', this.value)">
+            <button class="calc-btn" onclick="updateCount('${q.id}', 1)">+</button>
+          </div>
         `;
         container.appendChild(card);
       });
@@ -407,6 +548,7 @@
 
     renderGrid();
     renderQuests();
+    calculateTotal();
   </script>
 </body>
 </html>
