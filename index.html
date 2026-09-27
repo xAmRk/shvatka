@@ -3,111 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Схватка Гильдий v1.0.0</title>
-  <script src="https://telegram.org/js/telegram-web-app.js?v=1.0.0"></script>
+  <title>Схватка Гильдий v1.0.1</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?v=1.0.1"></script>
   <style>
     :root {
       --bg: var(--tg-theme-bg-color, #131922);
       --card-bg: var(--tg-theme-secondary-bg-color, #1e293b);
       --text: var(--tg-theme-text-color, #ffffff);
-      --hint: var(--tg-theme-hint-color, #8e9ea9);
-      --accent: var(--tg-theme-button-color, #ff9f43);
+      --hint: var(--tg-theme-hint-color, #94a3b8);
+      --accent: #ff9f43;
       --pts-color: #f1a93b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 14px; padding-bottom: 30px; }
+    body { background-color: var(--bg); color: var(--text); padding: 12px; padding-bottom: 25px; }
 
-    .header { text-align: center; margin-bottom: 12px; position: relative; }
-    .header h1 { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
-    .header p { font-size: 13px; color: var(--hint); margin-top: 2px; }
+    .header { text-align: center; margin-bottom: 12px; }
+    .header h1 { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+    .header p { font-size: 12px; color: var(--hint); margin-top: 2px; }
 
     .version-tag {
       display: inline-block;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       color: #00d2d3;
       background: rgba(0, 210, 211, 0.15);
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 6px;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
-    /* Вкладки дней недели */
-    .tabs-wrapper {
-      display: flex;
+    /* Компактная сетка 3x2: все 6 дней на одном экране */
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 10px;
       margin-bottom: 12px;
-      scrollbar-width: none;
     }
-    .tabs-wrapper::-webkit-scrollbar { display: none; }
 
-    .tab-btn {
-      background: var(--card-bg);
-      color: var(--hint);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
+    .day-btn {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 7px 4px;
+      text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      transition: all 0.15s ease;
     }
-    .tab-btn.active {
-      background: #ff9f43;
-      color: #1a1a1a;
-      border-color: #ff9f43;
+
+    .day-btn:active { transform: scale(0.96); }
+
+    .day-btn .d-top {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .day-btn .d-name {
+      font-size: 11px;
       font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .day-btn .d-tag {
+      font-size: 9px;
+      color: var(--hint);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    /* Активная вкладка */
+    .day-btn.active {
+      background: #ff9f43;
+      color: #0f172a;
+      border-color: #ff9f43;
+      box-shadow: 0 0 10px rgba(255, 159, 67, 0.4);
+    }
+    .day-btn.active .d-tag {
+      color: #1e293b;
+      font-weight: 600;
     }
 
     /* Баннер дня */
     .day-banner {
-      background: linear-gradient(135deg, #1f2b3e, #2b394f);
+      background: linear-gradient(135deg, #1e293b, #27354a);
       border-left: 4px solid #ff9f43;
       padding: 10px 14px;
       border-radius: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .day-title { font-size: 15px; font-weight: 700; }
-    .day-sub { font-size: 12px; color: var(--hint); }
+    .day-sub { font-size: 12px; color: var(--hint); margin-top: 1px; }
 
     /* Карточки заданий */
     .quest-card {
       background: var(--card-bg);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 8px;
+      border-radius: 10px;
+      padding: 11px 13px;
+      margin-bottom: 7px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .quest-name { font-size: 14px; font-weight: 500; max-width: 70%; line-height: 1.3; }
+    .quest-name { font-size: 13px; font-weight: 500; max-width: 72%; line-height: 1.35; color: #f8fafc; }
     .quest-pts {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--pts-color);
       background: rgba(241, 169, 59, 0.12);
       padding: 4px 8px;
-      border-radius: 8px;
+      border-radius: 6px;
       white-space: nowrap;
     }
 
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
+      padding: 35px 15px;
       color: var(--hint);
-      font-size: 14px;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -116,19 +144,19 @@
   <div class="header">
     <h1>⚔️ СХВАТКА ГИЛЬДИЙ</h1>
     <p>Список заданий и наградных очков</p>
-    <div class="version-tag">v1.0.0</div>
+    <div class="version-tag">v1.0.1</div>
   </div>
 
-  <!-- Вкладки дней -->
-  <div class="tabs-wrapper" id="tabs"></div>
+  <!-- Компактная сетка 6 дней недели (3 в ряд) -->
+  <div class="days-grid" id="days-grid"></div>
 
-  <!-- Баннер текущего дня -->
+  <!-- Инфо-баннер выбранного дня -->
   <div class="day-banner">
     <div>
       <div class="day-title" id="day-name">День 1: Мощь Титанов</div>
       <div class="day-sub" id="day-desc">Понедельник</div>
     </div>
-    <span style="font-size: 20px;">🛡️</span>
+    <span id="day-icon" style="font-size: 22px;">⚡</span>
   </div>
 
   <!-- Список заданий -->
@@ -142,7 +170,8 @@
     const daysData = [
       {
         id: 1,
-        tabName: "Пн (Д1)",
+        short: "Пн (Д1)",
+        tag: "Титаны",
         title: "День 1: Мощь Титанов",
         dayWeek: "Понедельник",
         icon: "⚡",
@@ -163,7 +192,8 @@
       },
       {
         id: 2,
-        tabName: "Вт (Д2)",
+        short: "Вт (Д2)",
+        tag: "Облики",
         title: "День 2: Облики героев",
         dayWeek: "Вторник",
         icon: "🥋",
@@ -171,7 +201,8 @@
       },
       {
         id: 3,
-        tabName: "Ср (Д3)",
+        short: "Ср (Д3)",
+        tag: "Технологии",
         title: "День 3: Мощь технологий",
         dayWeek: "Среда",
         icon: "🔬",
@@ -179,7 +210,8 @@
       },
       {
         id: 4,
-        tabName: "Чт (Д4)",
+        short: "Чт (Д4)",
+        tag: "Герои",
         title: "День 4: Мощь Героев",
         dayWeek: "Четверг",
         icon: "👑",
@@ -187,7 +219,8 @@
       },
       {
         id: 5,
-        tabName: "Пт (Д5)",
+        short: "Пт (Д5)",
+        tag: "Армия",
         title: "День 5: Тренировка Армии",
         dayWeek: "Пятница",
         icon: "🏹",
@@ -195,7 +228,8 @@
       },
       {
         id: 6,
-        tabName: "Сб (Д6)",
+        short: "Сб (Д6)",
+        tag: "Охота",
         title: "День 6: Охота на врага",
         dayWeek: "Суббота",
         icon: "🎯",
@@ -205,21 +239,26 @@
 
     let currentDayId = 1;
 
-    function renderTabs() {
-      const tabsContainer = document.getElementById("tabs");
-      tabsContainer.innerHTML = "";
+    function renderGrid() {
+      const grid = document.getElementById("days-grid");
+      grid.innerHTML = "";
+
       daysData.forEach(d => {
-        const btn = document.createElement("button");
-        btn.className = `tab-btn ${d.id === currentDayId ? "active" : ""}`;
-        btn.innerText = `${d.icon} ${d.tabName}`;
+        const btn = document.createElement("div");
+        btn.className = `day-btn ${d.id === currentDayId ? "active" : ""}`;
+        btn.innerHTML = `
+          <div class="d-top">${d.icon}</div>
+          <div class="d-name">${d.short}</div>
+          <div class="d-tag">${d.tag}</div>
+        `;
         btn.onclick = () => selectDay(d.id);
-        tabsContainer.appendChild(btn);
+        grid.appendChild(btn);
       });
     }
 
     function selectDay(id) {
       currentDayId = id;
-      renderTabs();
+      renderGrid();
       renderQuests();
       if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
@@ -228,6 +267,7 @@
       const day = daysData.find(d => d.id === currentDayId);
       document.getElementById("day-name").innerText = day.title;
       document.getElementById("day-desc").innerText = day.dayWeek;
+      document.getElementById("day-icon").innerText = day.icon;
 
       const container = document.getElementById("quests-container");
       container.innerHTML = "";
@@ -248,7 +288,7 @@
       });
     }
 
-    renderTabs();
+    renderGrid();
     renderQuests();
   </script>
 </body>
