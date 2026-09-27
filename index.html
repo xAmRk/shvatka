@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Схватка Гильдий v1.3.0</title>
-  <script src="https://telegram.org/js/telegram-web-app.js?v=1.3.0"></script>
+  <title>Схватка Гильдий v1.4.0</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?v=1.4.0"></script>
   <style>
     :root {
       --bg: var(--tg-theme-bg-color, #131922);
@@ -33,11 +33,15 @@
       margin-top: 3px;
     }
 
-    /* Сетка 3x2 */
+    /* Адаптивная сетка дней: 3 колонки для пн-сб и воскресенье отдельной кнопкой снизу */
     .days-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .sunday-row {
       margin-bottom: 12px;
     }
 
@@ -46,7 +50,7 @@
       color: #e2e8f0;
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 8px;
-      padding: 7px 4px;
+      padding: 6px 4px;
       text-align: center;
       cursor: pointer;
       display: flex;
@@ -58,7 +62,7 @@
     }
 
     .day-btn:active { transform: scale(0.96); }
-    .day-btn .d-top { font-size: 14px; line-height: 1; }
+    .day-btn .d-top { font-size: 13px; line-height: 1; }
     .day-btn .d-name { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
     .day-btn .d-tag {
       font-size: 9px;
@@ -68,6 +72,15 @@
       text-overflow: ellipsis;
       max-width: 100%;
     }
+
+    .day-btn.sunday-btn {
+      flex-direction: row;
+      gap: 8px;
+      padding: 7px 10px;
+      width: 100%;
+    }
+    .day-btn.sunday-btn .d-name { font-size: 12px; }
+    .day-btn.sunday-btn .d-tag { font-size: 11px; }
 
     .day-btn.active {
       background: #ff9f43;
@@ -87,6 +100,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+    .day-banner.rest-banner {
+      border-left-color: #00d2d3;
     }
     .day-title { font-size: 15px; font-weight: 700; }
     .day-sub { font-size: 12px; color: var(--hint); margin-top: 1px; }
@@ -146,7 +162,7 @@
       gap: 3px;
     }
 
-    /* Блок калькулятора в карточке */
+    /* Калькулятор */
     .calc-controls {
       display: flex;
       align-items: center;
@@ -182,7 +198,31 @@
       outline: none;
     }
 
-    /* Нижняя плавающая панель с суммой очков */
+    /* Экран выходного дня */
+    .rest-container {
+      text-align: center;
+      padding: 30px 18px;
+      background: var(--card-bg);
+      border-radius: 14px;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      margin-top: 10px;
+    }
+    .rest-icon { font-size: 48px; margin-bottom: 12px; }
+    .rest-title { font-size: 17px; font-weight: 700; color: #00d2d3; margin-bottom: 8px; }
+    .rest-text { font-size: 13px; color: var(--hint); line-height: 1.5; margin-bottom: 16px; }
+    .btn-plan {
+      background: #27354a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-plan:active { background: #ff9f43; color: #000; }
+
+    /* Нижняя плавающая панель */
     .bottom-bar {
       position: fixed;
       bottom: 0;
@@ -218,14 +258,17 @@
   <div class="header">
     <h1>⚔️ СХВАТКА ГИЛЬДИЙ</h1>
     <p>Калькулятор заданий и наградных очков</p>
-    <div class="version-tag">v1.3.0</div>
+    <div class="version-tag">v1.4.0</div>
   </div>
 
-  <!-- Сетка 6 дней -->
+  <!-- Дни Пн-Сб -->
   <div class="days-grid" id="days-grid"></div>
 
-  <!-- Баннер выбранного дня -->
-  <div class="day-banner">
+  <!-- Кнопка Воскресенья -->
+  <div class="sunday-row" id="sunday-container"></div>
+
+  <!-- Баннер дня -->
+  <div class="day-banner" id="day-banner">
     <div>
       <div class="day-title" id="day-name">День 1: Мощь Титанов</div>
       <div class="day-sub" id="day-desc">Понедельник</div>
@@ -233,11 +276,11 @@
     <span id="day-icon" style="font-size: 22px;">⚡</span>
   </div>
 
-  <!-- Контейнер заданий -->
+  <!-- Контейнер заданий / отдыха -->
   <div id="quests-container"></div>
 
   <!-- Нижняя панель суммы очков -->
-  <div class="bottom-bar">
+  <div class="bottom-bar" id="bottom-bar">
     <div>
       <div class="bottom-score-label">Очков за день:</div>
       <div class="bottom-score-val" id="total-score">0 <span>🟡</span></div>
@@ -423,17 +466,24 @@
           { id: "d6_27", icon: "🩹", name: "Используй ускорение лечения на 1 мин.", val: 200 },
           { id: "d6_28", icon: "⏱️", name: "Используй ускорение тренировок на 1 мин.", val: 200 }
         ]
+      },
+      {
+        id: 0,
+        short: "Вс",
+        tag: "Выходной",
+        title: "Воскресенье: Выходной",
+        dayWeek: "Воскресенье",
+        icon: "☕",
+        isRest: true,
+        quests: []
       }
     ];
 
-    // Хранилище введённых количеств: { questId: count }
     const counts = {};
 
-    // 1. Автоопределение текущего дня недели (1 = Пн, ..., 6 = Сб, 0/Вс = Пн)
     function getInitialDay() {
-      const dayNum = new Date().getDay();
-      if (dayNum >= 1 && dayNum <= 6) return dayNum;
-      return 1;
+      // 0 = Вс, 1 = Пн ... 6 = Сб
+      return new Date().getDay();
     }
 
     let currentDayId = getInitialDay();
@@ -442,11 +492,14 @@
       return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     }
 
-    function renderGrid() {
+    function renderButtons() {
       const grid = document.getElementById("days-grid");
+      const sunContainer = document.getElementById("sunday-container");
       grid.innerHTML = "";
+      sunContainer.innerHTML = "";
 
-      daysData.forEach(d => {
+      // Дни 1-6 (Пн - Сб)
+      daysData.filter(d => d.id !== 0).forEach(d => {
         const btn = document.createElement("div");
         btn.className = `day-btn ${d.id === currentDayId ? "active" : ""}`;
         btn.innerHTML = `
@@ -457,13 +510,24 @@
         btn.onclick = () => selectDay(d.id);
         grid.appendChild(btn);
       });
+
+      // Воскресенье (отдельная кнопка на всю ширину)
+      const sun = daysData.find(d => d.id === 0);
+      const sunBtn = document.createElement("div");
+      sunBtn.className = `day-btn sunday-btn ${currentDayId === 0 ? "active" : ""}`;
+      sunBtn.innerHTML = `
+        <span style="font-size: 15px;">☕</span>
+        <span class="d-name">Воскресенье</span>
+        <span class="d-tag">• Выходной день (отдых от Схватки)</span>
+      `;
+      sunBtn.onclick = () => selectDay(0);
+      sunContainer.appendChild(sunBtn);
     }
 
     function selectDay(id) {
       currentDayId = id;
-      renderGrid();
-      renderQuests();
-      calculateTotal();
+      renderButtons();
+      renderContent();
       if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
 
@@ -487,6 +551,7 @@
 
     function calculateTotal() {
       const day = daysData.find(d => d.id === currentDayId);
+      if (!day || day.isRest) return;
       let total = 0;
       day.quests.forEach(q => {
         if (!q.isDivider) {
@@ -499,21 +564,46 @@
 
     function resetDayCounters() {
       const day = daysData.find(d => d.id === currentDayId);
+      if (!day || day.isRest) return;
       day.quests.forEach(q => {
         if (!q.isDivider) delete counts[q.id];
       });
-      renderQuests();
+      renderContent();
       calculateTotal();
       if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("warning");
     }
 
-    function renderQuests() {
+    function renderContent() {
       const day = daysData.find(d => d.id === currentDayId);
+      const banner = document.getElementById("day-banner");
+      const bottomBar = document.getElementById("bottom-bar");
+      const container = document.getElementById("quests-container");
+
       document.getElementById("day-name").innerText = day.title;
       document.getElementById("day-desc").innerText = day.dayWeek;
       document.getElementById("day-icon").innerText = day.icon;
 
-      const container = document.getElementById("quests-container");
+      if (day.isRest) {
+        banner.className = "day-banner rest-banner";
+        bottomBar.style.display = "none";
+        document.body.style.paddingBottom = "25px";
+
+        container.innerHTML = `
+          <div class="rest-container">
+            <div class="rest-icon">🛋️ ☕</div>
+            <div class="rest-title">Сегодня перерыв от Схватки!</div>
+            <div class="rest-text">
+              Заданий на сегодня нет. Самое время перевести дух, копить ресурсы, сферы и зелья для нового раунда в понедельник!
+            </div>
+            <button class="btn-plan" onclick="selectDay(1)">📋 Посмотреть задания на Понедельник</button>
+          </div>
+        `;
+        return;
+      }
+
+      banner.className = "day-banner";
+      bottomBar.style.display = "flex";
+      document.body.style.paddingBottom = "95px";
       container.innerHTML = "";
 
       day.quests.forEach(q => {
@@ -544,11 +634,12 @@
         `;
         container.appendChild(card);
       });
+
+      calculateTotal();
     }
 
-    renderGrid();
-    renderQuests();
-    calculateTotal();
+    renderButtons();
+    renderContent();
   </script>
 </body>
 </html>
